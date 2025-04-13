@@ -1,0 +1,32 @@
+-cmd zookeeper(docker instead)
+-cmd kafka(docker instead)
+-running app.py
+-running consumer.py
+-open docker and run it
+-open postman
+-open amazon s3
+
+
+next missions:
+-postman checking everything
+-write scrip to send everything
+ -שלב 5: JWT לאימות משתמשים
+יצירת מערכת הרשמה והתחברות עם Flask
+
+יצירת Token עם JWT
+רק משתמש מחובר יוכל לשלוח הודעה
+
+
+Logging: אפשר להוסיף מערכת ניהול לוגים כמו ELK stack (Elasticsearch, Logstash, Kibana) או פשוט להשתמש ב-logging של פייתון. זה חשוב מאוד לעקוב אחרי בעיות בהפקה.
+
+Prometheus ו-Grafana: יכול להיות מעניין להוסיף מעקב אחר ביצועים כמו Latency, Throughput, ושימוש במשאבים.
+
+CI/CD: כדאי לשלב אוטומציה להורדת גרסאות ופריסת שינויים אוטומטית.
+
+TDD (Test-Driven Development): לשלב בדיקות unit ו-integration, ולעבוד על יציבות המערכת.
+
+Monitoring/Alerting: להוסיף מערכת של התראות במידה ויש בעיות במערכת.
+
+אני ממליץ גם להוסיף עיבוד שגיאות בצורה יותר מסודרת (כמו שימוש ב-try/except ו-error handling), וגם להרחיב את האבטחה בפרויקט, כמו למשל להשתמש ב-HTTPS וב-HSTS.
+
+אם תרצה, נוכל להמשיך עם כל אחד מהשלבים האלה לפי הסדר 😊
