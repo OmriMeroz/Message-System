@@ -30,3 +30,5 @@ Monitoring/Alerting: להוסיף מערכת של התראות במידה ויש
 אני ממליץ גם להוסיף עיבוד שגיאות בצורה יותר מסודרת (כמו שימוש ב-try/except ו-error handling), וגם להרחיב את האבטחה בפרויקט, כמו למשל להשתמש ב-HTTPS וב-HSTS.
 
 אם תרצה, נוכל להמשיך עם כל אחד מהשלבים האלה לפי הסדר 😊
+
+ליצור readme
