@@ -9,6 +9,8 @@ from flask_jwt_extended import JWTManager, create_access_token
 from datetime import timedelta
 from flask_jwt_extended import create_access_token, create_refresh_token
 from flask_jwt_extended import jwt_required, get_jwt_identity
+from werkzeug.security import generate_password_hash, check_password_hash
+
 
 
 
@@ -58,10 +60,13 @@ except Exception as e:
     print(" Kafka connection failed:", e)
 
 @app.route('/messages', methods=['POST'])
+@jwt_required()  # רק משתמשים מחוברים יכולים לשלוח הודעות
 def send_message():
     """
     שולח הודעה ל-Kafka ושומר אותה ב-S3
     ---
+    security:
+      - bearerAuth: []
     parameters:
       - name: message
         in: body
@@ -75,15 +80,22 @@ def send_message():
       200:
         description: ההודעה נשלחה ונותרה ב-S3
     """
+    current_user = get_jwt_identity()
     data = request.get_json()
     message = data.get('message')
 
     if not message:
         return jsonify({'error': 'Missing message'}), 400
 
+    message_payload = {
+        'user': current_user,
+        'message': message,
+        'timestamp': datetime.now().isoformat()
+    }
+
     # שליחה ל-Kafka
     try:
-        producer.send('message_topic', {'message': message})
+        producer.send('message_topic', message_payload)
         print(" Sent message to Kafka")
     except Exception as e:
         print(" Failed to send to Kafka:", e)
@@ -94,14 +106,14 @@ def send_message():
         s3.put_object(
             Bucket=bucket_name,
             Key=file_name,
-            Body=json.dumps({'message': message}),
+            Body=json.dumps(message_payload),
             ContentType='application/json'
         )
         print(f" Saved message to S3: {file_name}")
     except Exception as e:
         print(" Failed to save to S3:", e)
 
-    return jsonify({'status': 'sent', 'message': message}), 200
+    return jsonify({'status': 'sent', 'message': message_payload}), 200
 # דמוי-DB לאחסון משתמשים (באמת צריך להשתמש ב-database או ב-memory)
 users_db = {}
 
@@ -136,8 +148,9 @@ def register():
     if username in users_db:
         return jsonify({"msg": "User already exists"}), 400
     
-    # כאן ניתן להוסיף הצפנה לסיסמה (לא מומלץ לשמור סיסמה plain text)
-    users_db[username] = password
+    hashed_password = generate_password_hash(password, method='pbkdf2:sha256', salt_length=16) 
+    users_db[username] = hashed_password  
+
     return jsonify({"msg": "User registered successfully"}), 201
 
 
@@ -183,7 +196,7 @@ def login():
 
     # אימות המשתמש
     stored_password = users_db.get(username)
-    if stored_password is None or stored_password != password:
+    if stored_password is None or not check_password_hash(stored_password, password):  
         return jsonify({"msg": "Bad username or password"}), 401
 
     # יצירת JWT
